@@ -1,3 +1,6 @@
+The error "Unable to render rich display" in your screenshot is happening because the Mermaid diagram code block was not closed.
+GitHub thinks the text "## 🛠️ Tech Stack" is part of the diagram code, which breaks the graph. You just need to add three backticks (```) after the diagram to close it.
+Here is the Fixed, Complete README. Delete everything in your current file and paste this exactly:
 # 🚀 Enterprise RAG Chatbot (Watsonx + LangChain)
 
 A production-grade Retrieval-Augmented Generation (RAG) system designed for document analysis using IBM Granite 3.0 foundation models.
