@@ -40,7 +40,7 @@ To ensure reliability, the system tracks real-time metrics for every request:
    Granite-3-8b-instruct: Selected for its balance between reasoning capability and inference speed compared to Llama-3-70b.
 🚀 How to Run Locally
  * Clone the repository:
-   git clone https://github.com/menna-marghany/WatsonX-Enterprise-RAG.git
+   git clone [https://github.com/menna-marghany/WatsonX-Enterprise-RAG.git](https://github.com/menna-marghany/WatsonX-Enterprise-RAG.git)
 cd WatsonX-Enterprise-RAG
 
  * Install dependencies:
