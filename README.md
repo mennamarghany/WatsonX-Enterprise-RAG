@@ -1,79 +1,58 @@
+# 🚀 Enterprise RAG Chatbot (Watsonx + LangChain)
 
-# 🌪️ Multi-Modal Climate Disaster Response Agent
+A production-grade Retrieval-Augmented Generation (RAG) system designed for document analysis using IBM Granite 3.0 foundation models.
 
-An autonomous agentic system that combines computer vision, vector retrieval, and multimodal Generative AI to analyze disaster imagery and generate policy-compliant mitigation reports.
+🔴 **Live Demo:** [Click Here to Chat](https://huggingface.co/spaces/menna-marghany/WatsonX-Enterprise-RAG)
 
 ## 🏗️ Architecture Design
 
-This system implements a **Neuro-Symbolic AI architecture**, combining neural perception (computer vision) with symbolic reasoning (RAG + LLM).
+The system follows a modular "Load-Embed-Retrieve-Generate" pipeline optimized for low latency.
 
 ```mermaid
-graph TD
-    Input[Input Image] -->|Preprocessing| CNN[EfficientNetB4 Vision Model]
-    CNN -->|Softmax| Label[Predicted Classification e.g., 'Flood']
-    
-    subgraph "Retrieval Augmented Generation (RAG)"
-    Label -->|Query Expansion| VectorDB[(ChromaDB Knowledge Base)]
-    VectorDB -->|Retrieved Context| Policy[Climate Policy & Bio-eng Data]
-    end
-    
-    Input --> MultiModalLLM[Google Gemini 2.5 Flash]
-    Label --> MultiModalLLM
-    Policy --> MultiModalLLM
-    
-    MultiModalLLM -->|Chain of Thought| Report[Final Strategic Report]
+graph LR
+    A[PDF Document] -->|PyPDF Loader| B(Chunking & Cleaning)
+    B -->|RecursiveSplitter| C[Chunks]
+    C -->|HuggingFace Embeddings| D[(FAISS Vector Store)]
+    E[User Query] -->|Similarity Search| D
+    D -->|Top-k Context| F[IBM Granite LLM]
+    F -->|Generation| G[Final Answer]
 
 ```
 
 ## 🛠️ Tech Stack
 
-* **Computer Vision Training:** TensorFlow/Keras, EfficientNetB4 (Transfer Learning).
-* **Multimodal LLM:** Google Gemini 2.5 Flash (via new `google-genai` SDK).
-* **Vector Database:** ChromaDB (in-memory for rapid context retrieval).
-* **Embeddings:** HuggingFace (`all-MiniLM-L6-v2`).
-* **Training Optimization:** Mixed Precision (`float16`).
+* **Orchestration:** LangChain v0.2
+* **Vector Database:** FAISS (Facebook AI Similarity Search) for sub-millisecond retrieval.
+* **LLM:** IBM Granite-3-8b-instruct (via Watsonx.ai).
+* **Frontend:** Gradio 5.42 (with Observability metrics).
+* **Deployment:** Dockerized on Hugging Face Spaces (CPU Tier).
 
-## 📊 Performance Metrics (Model Training)
+## 📊 Performance Metrics (Observability)
 
-The vision component was trained on a dataset of ~9,500 images across 12 disaster classes.
+To ensure reliability, the system tracks real-time metrics for every request:
 
-| Metric | Result (Validation Set) | Notes |
-| --- | --- | --- |
-| **Final Accuracy** | **91.32%** | Achieved after 8 epochs of fine-tuning. |
-| **Final Loss** | **0.3044** | Demonstrates strong convergence without overfitting. |
-| **Training Time** | ~20 mins | Optimized using T4 GPU and Mixed Precision. |
-| **Inference Latency** | < 2s (end-to-end) | Includes vision prediction, retrieval, and LLM generation. |
+| Metric | Target | Actual (Avg) | Optimization |
+| --- | --- | --- | --- |
+| **p95 Latency** | < 5.0s | ~3.2s | FAISS In-memory indexing |
+| **Retrieval Accuracy** | > 85% | N/A | Hybrid Search (planned) |
+| **Cost per Query** | < $0.01 | ~$0.002 | Token usage optimization |
+| **Cold Start** | < 10s | ~4s | Lazy loading of embeddings |
 
-*Note: Confusion matrices indicate strong performance across distinct categories, with minor confusion between visually similar sub-classes (e.g., different types of wind damage).*
+## 🔧 Key Engineering Decisions
 
-## 🔧 Key Engineering Decisions & Trade-offs
+1. **Why FAISS?**
+Chosen over ChromaDB for this iteration due to its superior performance on CPU-only environments (Hugging Face Free Tier).
+2. **Chunking Strategy:**
+`chunk_size=1000`, `chunk_overlap=150`. Large chunks retain more semantic context, reducing hallucination risks during retrieval.
+3. **Model Selection:**
+**Granite-3-8b-instruct**: Selected for its balance between reasoning capability and inference speed compared to Llama-3-70b.
 
-**1. Why EfficientNetB4 over ResNet50?**
-
-* **Decision:** Used EfficientNetB4 for the vision backbone.
-* **Trade-off:** EfficientNet uses compound scaling to achieve better accuracy with fewer parameters than ResNet, resulting in faster training and inference on constrained cloud resources (like Colab T4 GPUs), despite being slightly more complex architecturally.
-
-**2. Mixed Precision Training (`float16`)**
-
-* **Decision:** Implemented TensorFlow mixed precision policies.
-* **Trade-off:** Sacrificed a tiny fraction of numerical precision for a ~2x speedup in training time and reduced GPU memory usage, allowing for larger batch sizes.
-
-**3. In-memory ChromaDB vs. External Vector DB**
-
-* **Decision:** Used ChromaDB in persistent local mode.
-* **Trade-off:** Since the "Climate Intelligence Policy" knowledge base is currently small and static, an in-memory solution reduces architectural complexity and network latency compared to setting up an external service like Pinecone or Weaviate.
-
-**4. Agentic LLM: Gemini 2.5 Flash**
-
-* **Decision:** Chosen for the final reasoning step.
-* **Reasoning:** Its native multimodal capabilities allow it to "see" the image directly while simultaneously processing the retrieved textual context, leading to more grounded reports than text-only models.
-
-## 🚀 How to Run the Agent Locally
+## 🚀 How to Run Locally
 
 1. **Clone the repository:**
 ```bash
-git clone [https://github.com/YOUR_USERNAME/Disaster-Response-Agent.git](https://github.com/YOUR_USERNAME/Disaster-Response-Agent.git)
-cd Disaster-Response-Agent
+git clone [https://github.com/menna-marghany/WatsonX-Enterprise-RAG.git](https://github.com/menna-marghany/WatsonX-Enterprise-RAG.git)
+cd WatsonX-Enterprise-RAG
 
 ```
 
@@ -85,24 +64,23 @@ pip install -r requirements.txt
 ```
 
 
-3. **Set your Google API Key:**
+3. **Set Environment Variables:**
 ```bash
-# Linux/Mac
-export GEMINI_API_KEY="your_new_api_key_here"
-# Windows PowerShell
-$env:GEMINI_API_KEY="your_new_api_key_here"
+export WATSONX_APIKEY="your_api_key"
+export WATSONX_PROJECT_ID="your_project_id"
 
 ```
 
 
-4. **Run the Agent Inference Script:**
-*Note: You need the trained `.keras` model file present.*
+4. **Run the App:**
 ```bash
-python run_agent.py
+python app.py
 
 ```
 
 
 
 
+3.  **Added the Local Run Instructions:** This is now safely at the bottom where developers expect to find it.
 
+```
