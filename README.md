@@ -17,6 +17,7 @@ graph LR
     D -->|Top-k Context| F[IBM Granite LLM]
     F -->|Generation| G[Final Answer]
 
+
 🛠️ Tech Stack
 	•	Orchestration: LangChain v0.2
 	•	Vector Database: FAISS (Facebook AI Similarity Search) for sub-millisecond retrieval
@@ -24,30 +25,33 @@ graph LR
 	•	Frontend: Gradio 5.42 (with observability metrics)
 	•	Deployment: Dockerized on Hugging Face Spaces (CPU Tier)
 
+
 📊 Performance Metrics (Observability)
 
 To ensure reliability, the system tracks real-time metrics for every request:
 
-Metric	Target	Actual (Avg)	Optimization
-p95 Latency	< 5.0s	~3.2s	FAISS in-memory indexing
-Retrieval Accuracy	> 85%	N/A	Hybrid search (planned)
-Cost per Query	< $0.01	~$0.002	Token usage optimization
-Cold Start	< 10s	~4s	Lazy loading of embeddings
+Metric     		Target  		Actual (Avg)		Optimization
+p95 Latency		< 5.0s			~3.2s			FAISS in-memory indexing
+Retrieval Accuracy	> 85%	    N/A				Hybrid search (planned)
+Cost per Query	< $0.01 		~$0.002			Token usage optimization
+Cold Start		< 10s		    ~4s				Lazy loading of embeddings
+
 
 🔧 Key Engineering Decisions
 
-Why FAISS?
+1. Why FAISS?
 
 Chosen over ChromaDB due to superior performance on CPU-only environments (Hugging Face Free Tier).
 
-Chunking Strategy
+2. Chunking Strategy
 
 chunk_size=1000, chunk_overlap=150
 Larger chunks preserve semantic context and reduce hallucinations.
 
-Model Selection
+3. Model Selection
 
 Granite-3-8b-instruct was selected for its balance between reasoning quality and inference speed compared to larger models like Llama-3-70b.
+
 
 🚀 How to Run Locally
 
@@ -57,6 +61,4 @@ pip install -r requirements.txt
 export WATSONX_APIKEY="your_api_key"
 export WATSONX_PROJECT_ID="your_project_id"
 python app.py
-
-
 
