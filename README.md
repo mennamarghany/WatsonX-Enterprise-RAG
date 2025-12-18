@@ -80,7 +80,3 @@ python app.py
 
 
 
-
-3.  **Added the Local Run Instructions:** This is now safely at the bottom where developers expect to find it.
-
-```
