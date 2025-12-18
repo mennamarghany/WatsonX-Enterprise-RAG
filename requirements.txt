@@ -1,0 +1,10 @@
+gradio>=5.42
+ibm-watsonx-ai
+langchain==0.2.6
+langchain-community==0.2.6
+langchain-text-splitters==0.2.1
+faiss-cpu
+pypdf
+sentence-transformers>=2.2
+torch
+tiktoken
